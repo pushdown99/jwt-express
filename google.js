@@ -13,8 +13,8 @@ const server = http.createServer(app);
 const PORT = 8080;
 
 // 위의 Google Developers Console에서 생성한 client id와 secret
-const GOOGLE_CLIENT_ID = "your_google_client_id";
-const GOOGLE_CLIENT_SECRET = "your_google_client_secret";
+const GOOGLE_CLIENT_ID = process.env.CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.CLIENT_SECRET;
 
 // db session store options
 const options = {
@@ -63,8 +63,8 @@ passport.deserializeUser(function (id, done) {
 passport.use(
     new GoogleStrategy(
         {
-            clientID: process.env.CLIENT_ID,
-            clientSecret: process.env.CLIENT_SECRET,
+            clientID: GOOGLE_CLIENT_ID,
+            clientSecret: GOOGLE_CLIENT_SECRET,
             callbackURL: "http://127.0.0.1:8080/auth/google/callback",
             passReqToCallback: true,
         },
@@ -123,10 +123,12 @@ app.get(
 );
 
 // logout
-app.get("/logout", (req, res) => {
-    req.logout();
-    res.redirect("/login");
-});
+app.get('/logout', function(req, res, next) {
+    req.logout(function(err) {
+      if (err) { return next(err); }
+      res.redirect('/');
+    });
+  });
 
 server.listen(PORT, () => {
     console.log(`Server running on ${PORT}`);
